@@ -523,12 +523,12 @@ namespace SupportUtil.Classes
             dbList.Add(db);
 
             db = new db();
-            db.connStr = db_GhlStaging.connStr;
-            db.ip = db_GhlStaging.ip;
-            db.userId = db_GhlStaging.userId;
-            db.password = db_GhlStaging.password;
-            db.dbfullname = db_GhlStaging.dbfullname;
-            db.MyID = db_GhlStaging.MyID;
+            db.connStr = db_ghlstaging.connStr;
+            db.ip = db_ghlstaging.ip;
+            db.userId = db_ghlstaging.userId;
+            db.password = db_ghlstaging.password;
+            db.dbfullname = db_ghlstaging.dbfullname;
+            db.MyID = db_ghlstaging.MyID;
             dbList.Add(db);
 
             //---- search each db and write to excel worksheet

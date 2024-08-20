@@ -50,6 +50,16 @@
         public static string MyID = "db_tm2";
     }
 
+    public class db_tm3
+    {
+        public static string connStr = "Server=192.82.60.55;Database=ThirdM3;User Id=sa;Password=p@ssw0rd;TrustServerCertificate=true;";
+        public static string dbfullname = "ThirdM3";
+        public static string ip = "192.82.60.55";
+        public static string userId = "sa";
+        public static string password = "p@ssw0rd";
+        public static string MyID = "db_tm3";
+    }
+
     public class db_bv
     {
         public static string connStr = "Server=192.82.60.55;Database=BV;User Id=sa;Password=p@ssw0rd;TrustServerCertificate=true;";
@@ -90,6 +100,17 @@
         public static string MyID = "db_king4d";
     }
 
+    public class db_togelking
+    {
+        public static string connStr = "Server=192.82.60.149;Database=TogelKing;User Id=sa;Password=p@ssw0rd;TrustServerCertificate=true;";
+        public static string dbfullname = "TogelKing";
+        public static string ip = "192.82.60.149";
+        public static string userId = "sa";
+        public static string password = "p@ssw0rd";
+        public static string MyID = "db_togelking";
+    }
+
+
     public class db_local
     {
         public static string connStr = "Server=localhost;Database=ThirdM;User Id=sa;Password=Kamyen@72;TrustServerCertificate=true;";
@@ -100,14 +121,14 @@
         public static string MyID = "db_local";
     }
 
-    public class db_GhlStaging
+    public class db_ghlstaging
     {
         public static string connStr = "Server=118.107.201.247;Database=GhlStaging;User Id=sa;Password=p@ssw0rd;TrustServerCertificate=true;";
         public static string dbfullname = "GhlStaging";
         public static string ip = "118.107.201.247";
         public static string userId = "sa";
         public static string password = "p@ssw0rd";
-        public static string MyID = "db_GhlStaging";
+        public static string MyID = "db_ghlstaging";
     }
 
     public class db

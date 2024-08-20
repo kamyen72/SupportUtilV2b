@@ -1,5 +1,6 @@
 ﻿using DupRecRemoval.Classes;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using System.Data;
 using System.Net;
 
@@ -237,7 +238,8 @@ namespace SupportUtil.Classes
 
                 int maxcount = myDataRows.Rows.Count;
 
-                for (int x = 0; x < maxcount; x++) { 
+                for (int x = 0; x < maxcount; x++)
+                {
                     DataRow r = myDataRows.Rows[x];
                     MPlayerAll m = new MPlayerAll();
                     m.Source = r["Source"].ToString();
@@ -608,7 +610,7 @@ namespace SupportUtil.Classes
                         m.SelectedNums = r["SelectedNums"].ToString();
                         m.MemberID = int.Parse(r["MemberID"].ToString());
                         m.CurrentPeriod = r["CurrentPeriod"].ToString();
-                        m.GDMP_ID = int.Parse( r["GDMP_ID"].ToString() );
+                        m.GDMP_ID = int.Parse(r["GDMP_ID"].ToString());
 
                         mainlist2.Rows.Add(m);
                     }
@@ -684,7 +686,8 @@ namespace SupportUtil.Classes
             DBList dBList = new DBList();
             int maxrec = dBList.dbs.Count;
 
-            for (int x = 0; x < maxrec; x++) { 
+            for (int x = 0; x < maxrec; x++)
+            {
                 db thisdb = dBList.dbs[x];
                 if (thisdb.MyID.ToLower() == dbname.ToLower())
                 {
@@ -715,5 +718,160 @@ namespace SupportUtil.Classes
             return "";
 
         }
+
+        public string GetGameDealerMPlayerBaseByDB(string DBName, string CurrentPeriod)
+        {
+            var localconnstr = "";
+            DBList dBList = new DBList();
+            int maxrec = dBList.dbs.Count;
+            db thisdb = new db();
+            string jsonString = "";
+
+            for (int i = 0; i < maxrec; i++)
+            {
+                thisdb = dBList.dbs[i];
+
+                if (thisdb.MyID == DBName) {
+                    break;
+                }
+            }
+
+            localconnstr = thisdb.connStr;
+
+            if (localconnstr != null && localconnstr != "")
+            {
+                string sql = "";
+                sql = sql + "declare @CurrentPeriod nvarchar(max) ";
+                sql = sql + "set @CurrentPeriod = '@dbCurrentPeriod' ";
+                sql = sql + "drop table if exists #tempGDMPlayer ";
+                sql = sql + "create table #tempGDMPlayer ( ";
+                sql = sql + "DBname nvarchar(max) null ";
+                sql = sql + ", GDMP_ID int null ";
+                sql = sql + ", UserName nvarchar(max) null ";
+                sql = sql + ", GameDealerMemberID int null ";
+                sql = sql + ", MemberID int null ";
+                sql = sql + ", SelectedNums nvarchar(max) null ";
+                sql = sql + ", UpdateDate datetime null ";
+                sql = sql + ", GDMP_Recs int null ";
+                sql = sql + ", [MPlayer_Rec] int null ";
+                sql = sql + ", [MPUpdateDate] datetime null ";
+                sql = sql + ", CurrentPeriod nvarchar(max) null ";
+                sql = sql + ") ";
+                sql = sql + "insert into #tempGDMPlayer (dbname, GDMP_ID, MemberID, SelectedNums, UpdateDate, CurrentPeriod) ";
+                sql = sql + "select '@dbName', ID, MemberID, SelectedNums, UpdateDate, CurrentPeriod ";
+                sql = sql + "from GameDealerMPlayer ";
+                sql = sql + "where CurrentPeriod = @CurrentPeriod and MemberID <> 0 and MemberID is not null ";
+                sql = sql + "Update #tempGDMPlayer ";
+                sql = sql + "set UserName = (select top 1 UserName from Mplayer where GamedealerMemberID = a.MemberID) ";
+                sql = sql + "from #tempGDMPlayer a ";
+                sql = sql + "select * from #tempGDMPlayer ";
+
+                string sql2 = sql.Replace("@dbCurrentPeriod", CurrentPeriod)
+                                 .Replace("@dbName", thisdb.MyID);
+
+                SqlConnection connection = new SqlConnection(localconnstr);
+                connection.Open();
+                DataTable myDataRows = new DataTable();
+                SqlCommand command = new SqlCommand(sql2, connection);
+                command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(myDataRows);
+                connection.Close();
+
+                jsonString = JsonConvert.SerializeObject(myDataRows, Formatting.Indented);
+            }
+
+            return jsonString;
+        }
+
+        public string GetMPlayerMinimumListByDB(string DBName, string CurrentPeriod)
+        {
+            var localconnstr = "";
+            DBList dBList = new DBList();
+            int maxrec = dBList.dbs.Count;
+            db thisdb = new db();
+            string jsonString = "";
+
+            for (int i = 0; i < maxrec; i++)
+            {
+                thisdb = dBList.dbs[i];
+                if (thisdb.MyID == DBName) {
+                    break;
+                }
+            }
+
+            localconnstr = thisdb.connStr;
+
+            if (localconnstr != null && localconnstr != "")
+            {
+                string sql = "";
+                sql = sql + "drop table if exists #tempMplayer ";
+                sql = sql + "create table #tempMplayer ( ";
+                sql = sql + "DBname nvarchar(max) null ";
+                sql = sql + ", CurrentPeriod nvarchar(max) null ";
+                sql = sql + ", UpdateDate datetime null ";
+                sql = sql + ", UserName nvarchar(max) null ";
+                sql = sql + ", GameDealerMemberID int null ";
+                sql = sql + ", SelectedNums nvarchar(max) null ";
+                sql = sql + ") ";
+                sql = sql + "insert into #tempMplayer (DBname, CurrentPeriod, UpdateDate, UserName, GameDealerMemberID, SelectedNums) ";
+                sql = sql + "select distinct '@dbName', CurrentPeriod, UpdateDate, UserName, GameDealerMemberID, SelectedNums ";
+                sql = sql + "from Mplayer where CurrentPeriod = '@dbCurrentPeriod' ";
+                sql = sql + "select * from #tempMplayer ";
+
+                string sql2 = sql.Replace("@dbCurrentPeriod", CurrentPeriod)
+                                 .Replace("@dbName", thisdb.MyID);
+
+                SqlConnection connection = new SqlConnection(localconnstr);
+                connection.Open();
+                DataTable myDataRows = new DataTable();
+                SqlCommand command = new SqlCommand(sql2, connection);
+                command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                adapter.Fill(myDataRows);
+                connection.Close();
+
+                jsonString = JsonConvert.SerializeObject(myDataRows, Formatting.Indented);
+            }
+            return jsonString;
+        }
+
+        public void CreateMissingMPlayerByDB(string dbname, string allIDs)
+        {
+            DBList alldbs = new DBList();
+            int mx = alldbs.dbs.Count;
+            db thisdb = new db();
+            for (int i = 0; i < mx; i++)
+            {
+                thisdb = alldbs.dbs[i];
+                if (thisdb.MyID == dbname)
+                {
+                    break;
+                }
+            }
+
+            string localconnstr = thisdb.connStr;
+
+            if (localconnstr != null && localconnstr != "")
+            {
+                string sql = "";
+                sql = sql + "INSERT INTO MPlayer ";
+                sql = sql + "SELECT null,0,gm.MemberID,gp.UserName,[LotteryInfoID],gm.[CompanyID],[CurrentPeriod],[LotteryInfoName] ";
+                sql = sql + ",[SelectedNums],[IsAfter],[IsWinStop],[ManualBet],[Multiple],[DiscountPrice],[Price],[Qty],[IsWin],getdate() ";
+                sql = sql + ",[RebatePro],[RebateProMoney],[WinMoney],[WinMoneyWithCapital],0,0,0,0,0,0,0,[CreateID],gm.[CreateDate],[UpdateID],gm.[UpdateDate] ";
+                sql = sql + "FROM GameDealerMPlayer gm ";
+                sql = sql + "LEFT JOIN GameDealerMemberShip gp on gm.MemberID = gp.MemberID ";
+                sql = sql + "WHERE gm.ID in ( @dbAllIDs ) ";
+
+                string sql2 = sql.Replace("@dbAllIDs", allIDs);
+                SqlConnection connection = new SqlConnection(localconnstr);
+                connection.Open();
+                SqlCommand command = new SqlCommand(sql2, connection);
+                command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+        }
+
     }
 }

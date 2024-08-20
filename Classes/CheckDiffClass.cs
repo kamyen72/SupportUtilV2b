@@ -1,4 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
+using SupportUtil.Classes;
+using SupportUtilV2.Classes;
 using System.Data;
 
 namespace DupRecRemoval.Classes
@@ -61,6 +64,68 @@ namespace DupRecRemoval.Classes
             }
 
             return diffrecs;
+        }
+
+        public bool CompareGDMP_MP(List<GameDealerMPlayerBase> gdmplist, List<MPlayerMinimum> mplist, ref List<GameDealerMPlayerBase> gdmpfilterlist)
+        {
+            int gdpmax = gdmplist.Count;
+            int mpmax = mplist.Count;
+            bool isMissingItem = true;
+            int recfound = 0;
+            int missedrec = 0;
+            var bb = "";
+            for (int g = 0; g < gdpmax; g++)
+            {
+                GameDealerMPlayerBase gbase = gdmplist[g];
+                
+                int missingrec = 0;
+
+                bb = gbase.DBname;
+
+                var resultlist = mplist.Where(m => m.DBname == bb && m.GameDealerMemberID == gbase.MemberID && m.CurrentPeriod == gbase.CurrentPeriod && m.SelectedNums == gbase.SelectedNums).ToList<MPlayerMinimum>();
+                var chk = resultlist.Count;
+                if (chk != 0)
+                {
+                    recfound++;
+                }
+                else
+                {
+                    missedrec++;
+                }
+
+                //for (int m = 0; m < mpmax; m++)
+                //{
+                //    MPlayerMinimum mbase = mplist[m];
+                //    var mb = mbase.DBname;
+                //    if (gbase.DBname == mbase.DBname && gbase.CurrentPeriod == mbase.CurrentPeriod && gbase.MemberID == mbase.GameDealerMemberID && gbase.SelectedNums == mbase.SelectedNums)
+                //    {
+                //        recfound++;
+                //        //missingrec = 0;
+                //        break;
+                //    }
+                //    //else
+                //    //{
+                //    //    missingrec++;
+                //    //}
+                //}
+                //if (recfound != mpmax - 1)
+                //{
+                //    gdmpfilterlist.Add(gbase);
+                //    isMissingItem = true;
+                //}
+            }
+
+            //if (bb == "db_ghl55")
+            //{
+            //    var gg = recfound;
+            //    var mr = missedrec;
+            //}
+
+            if (missedrec == 0) {
+                isMissingItem = false;
+            }
+
+            return isMissingItem;
         }
     }
 }

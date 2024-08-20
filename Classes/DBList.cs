@@ -25,6 +25,15 @@
             dbs.Add(db);
 
             db = new db();
+            db.connStr = db_togelking.connStr;
+            db.ip = db_togelking.ip;
+            db.userId = db_togelking.userId;
+            db.password = db_togelking.password;
+            db.dbfullname = db_togelking.dbfullname;
+            db.MyID = db_togelking.MyID;
+            dbs.Add(db);
+
+            db = new db();
             db.connStr = db_bv.connStr;
             db.ip = db_bv.ip;
             db.userId = db_bv.userId;
@@ -85,6 +94,15 @@
             db.MyID= db_tm2.MyID;
             dbs.Add(db);
 
+            db = new db();
+            db.connStr = db_tm3.connStr;
+            db.ip = db_tm3.ip;
+            db.userId = db_tm3.userId;
+            db.password = db_tm3.password;
+            db.dbfullname = db_tm3.dbfullname;
+            db.MyID = db_tm3.MyID;
+            dbs.Add(db);
+
             //remarked for Imran testing
 
             db = new db();
@@ -97,12 +115,12 @@
             dbs.Add(db);
 
             db = new db();
-            db.connStr = db_GhlStaging.connStr;
-            db.ip = db_GhlStaging.ip;
-            db.userId = db_GhlStaging.userId;
-            db.password = db_GhlStaging.password;
-            db.dbfullname = db_GhlStaging.dbfullname;
-            db.MyID=db_GhlStaging.MyID;
+            db.connStr = db_ghlstaging.connStr;
+            db.ip = db_ghlstaging.ip;
+            db.userId = db_ghlstaging.userId;
+            db.password = db_ghlstaging.password;
+            db.dbfullname = db_ghlstaging.dbfullname;
+            db.MyID= db_ghlstaging.MyID;
             dbs.Add(db);
 
         }

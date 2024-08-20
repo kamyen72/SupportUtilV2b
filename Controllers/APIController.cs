@@ -17,6 +17,7 @@ using ClosedXML.Excel.Drawings;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using SupportUtil.Classes;
+using SupportUtilV2.Classes;
 
 namespace DupRecRemoval.Controllers
 {
@@ -454,12 +455,12 @@ namespace DupRecRemoval.Controllers
             dbList.Add(db);
 
             db = new db();
-            db.connStr = db_GhlStaging.connStr;
-            db.ip = db_GhlStaging.ip;
-            db.userId = db_GhlStaging.userId;
-            db.password = db_GhlStaging.password;
-            db.dbfullname = db_GhlStaging.dbfullname;
-            db.MyID = db_GhlStaging.MyID;
+            db.connStr = db_ghlstaging.connStr;
+            db.ip = db_ghlstaging.ip;
+            db.userId = db_ghlstaging.userId;
+            db.password = db_ghlstaging.password;
+            db.dbfullname = db_ghlstaging.dbfullname;
+            db.MyID = db_ghlstaging.MyID;
             dbList.Add(db);
 
             //---- search each db and write to excel worksheet
@@ -612,6 +613,118 @@ namespace DupRecRemoval.Controllers
             
 
             string rJason = JsonConvert.SerializeObject(outputGDMPlist2.Rows);
+            return Ok(rJason);
+        }
+
+
+        [EnableCors("AllowAll")]
+        [Route("CreateMissingMPlayerByDB")]
+        [HttpPost]
+        public IActionResult CreateMissingMPlayerByDB([FromBody] CreateMPlayerInput model)
+        {
+            string AllIDs = model.allIDs;
+            string dbName = model.dbname;
+
+            DBUtil dBUtil = new DBUtil();
+            dBUtil.CreateMissingMPlayerByDB(dbName, AllIDs);
+
+            ReturnModel rJason = new ReturnModel();
+            rJason.ReturnText = "Done Creation of MPlayer Records";
+            return Ok(rJason);
+        }
+
+        [EnableCors("AllowAll")]
+        [Route("CheckMissingMPlayerByDB")]
+        [HttpPost]
+        public IActionResult CheckMissingMPlayerByDB([FromBody] MissingMPlayerInput model)
+        {
+            string CurrentPeriod = model.CurrentPeriod;
+            string DBName = model.DBNametoSearch;
+
+            ReturnModel returnModel = new ReturnModel();
+
+            DBUtil dbu = new DBUtil();
+            string MPjsonstr = dbu.GetMPlayerMinimumListByDB(DBName, CurrentPeriod);
+            string GDMPjsonstr = dbu.GetGameDealerMPlayerBaseByDB(DBName, CurrentPeriod);
+
+            List<GameDealerMPlayerBase> GDMPlist = JsonConvert.DeserializeObject<List<GameDealerMPlayerBase>>(GDMPjsonstr);
+            List<MPlayerMinimum> MPlist = JsonConvert.DeserializeObject<List<MPlayerMinimum>>(MPjsonstr);
+
+            int gdrecs = GDMPlist.Count;
+            int mprecs = MPlist.Count;
+
+            List<GameDealerMPlayerBase> missinglist = new List<GameDealerMPlayerBase>();
+            for (int g = 0; g < gdrecs; g++)
+            {
+                GameDealerMPlayerBase gdmp = GDMPlist[g];
+                int foundrec = 0;
+                for (int m = 0; m < mprecs; m++)
+                {
+                    MPlayerMinimum mpm = MPlist[m];
+
+                    if (gdmp.DBname == mpm.DBname && gdmp.CurrentPeriod == mpm.CurrentPeriod && gdmp.MemberID == mpm.GameDealerMemberID && gdmp.SelectedNums == mpm.SelectedNums)
+                    {
+                        foundrec++;
+                        break;
+                    }
+                }
+                if (foundrec == 0)
+                {
+                    // add to missinglist
+                    missinglist.Add(gdmp);
+                }
+            }
+
+            string rJason = JsonConvert.SerializeObject(missinglist);
+            return Ok(rJason);
+        }
+
+        [EnableCors("AllowAll")]
+        [Route("CheckMissingMPlayerAllDBs")]
+        [HttpPost]
+        public IActionResult CheckMissingMPlayerAllDBs([FromBody] InputModel model)
+        {
+            string CurrentPeriod = model.InputText;
+
+            DBList dBList = new DBList();
+            int mx = dBList.dbs.Count;
+            DBUtil dbu = new DBUtil();
+            string gdmpjson = "";
+            string mpjson = "";
+            List<GameDealerMPlayerBase> gdmplist = new List<GameDealerMPlayerBase>();
+            List<MPlayerMinimum> mplist = new List<MPlayerMinimum>();
+
+            List<GameDealerMPlayerBase> MissingGDMPlist = new List<GameDealerMPlayerBase>();
+            CheckDiffClass checker = new CheckDiffClass();
+
+            List<MissingList> mastermissinglist = new List<MissingList>();
+
+            for (int i = 0; i < mx; i++) {
+                db tdb = dBList.dbs[i];
+                gdmpjson = dbu.GetGameDealerMPlayerBaseByDB(tdb.MyID, CurrentPeriod);
+                mpjson = dbu.GetMPlayerMinimumListByDB(tdb.MyID, CurrentPeriod);
+
+                gdmplist = JsonConvert.DeserializeObject<List<GameDealerMPlayerBase>>(gdmpjson);
+                mplist = JsonConvert.DeserializeObject<List<MPlayerMinimum>>(mpjson);
+
+                if (tdb.MyID == "db_ghl55")
+                {
+                    var xyz = "stop";
+                }
+
+                bool result = checker.CompareGDMP_MP(gdmplist, mplist, ref MissingGDMPlist);
+                if (result)
+                {
+                    MissingList mi = new MissingList();
+                    mi.dbname = tdb.MyID;
+                    mi.Rows = MissingGDMPlist;
+                    mastermissinglist.Add(mi);
+                }
+            }
+
+            var ttt = mastermissinglist.Count;
+
+            string rJason = JsonConvert.SerializeObject(mastermissinglist);
             return Ok(rJason);
         }
     }
