@@ -1,8 +1,8 @@
 {
   "Files": [
     {
-      "Id": "C:\\source_codes\\SupportUtilV2\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\SupportUtil.bundle.scp.css",
-      "PackagePath": "staticwebassets\\SupportUtil.bundle.scp.css"
+      "Id": "C:\\source_codes\\SupportUtilV2\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\SupportUtilV2.bundle.scp.css",
+      "PackagePath": "staticwebassets\\SupportUtilV2.bundle.scp.css"
     },
     {
       "Id": "C:\\source_codes\\SupportUtilV2\\wwwroot\\CheckMissingMPlayer.html",
@@ -273,20 +273,20 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SupportUtil.Microsoft.AspNetCore.StaticWebAssets.props",
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.SupportUtilV2.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },
     {
-      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SupportUtil.props",
-      "PackagePath": "build\\SupportUtil.props"
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.SupportUtilV2.props",
+      "PackagePath": "build\\SupportUtilV2.props"
     },
     {
-      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SupportUtil.props",
-      "PackagePath": "buildMultiTargeting\\SupportUtil.props"
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.SupportUtilV2.props",
+      "PackagePath": "buildMultiTargeting\\SupportUtilV2.props"
     },
     {
-      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SupportUtil.props",
-      "PackagePath": "buildTransitive\\SupportUtil.props"
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.SupportUtilV2.props",
+      "PackagePath": "buildTransitive\\SupportUtilV2.props"
     }
   ],
   "ElementsToRemove": []

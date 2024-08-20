@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\SupportUtilV2.props" />
+</Project>
