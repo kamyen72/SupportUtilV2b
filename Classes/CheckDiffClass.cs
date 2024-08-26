@@ -29,9 +29,9 @@ namespace DupRecRemoval.Classes
             sql = sql + "insert into #tempcompare (CurrentPeriod, SelectedNums, UserName, GameDealerMemberID, MPlayer_Recs, GDMPlayer_Recs) ";
             sql = sql + "select CurrentPeriod, SelectedNums, UserName, GameDealerMemberID, count(*) as Recs ";
             sql = sql + ", (select count(*)  ";
-            sql = sql + "from GameDealerMPlayer where CurrentPeriod = a.CurrentPeriod and SelectedNums = a.SelectedNums and MemberID = a.GameDealerMemberID) ";
+            sql = sql + "from GameDealerMPlayer where CurrentPeriod = a.CurrentPeriod and SelectedNums = a.SelectedNums and MemberID = a.GameDealerMemberID and iswin is null) ";
             sql = sql + "from Mplayer a ";
-            sql = sql + "where CurrentPeriod = @CurrentPeriod ";
+            sql = sql + "where CurrentPeriod = @CurrentPeriod and iswin is null ";
             sql = sql + "group by CurrentPeriod, SelectedNums, UserName, GameDealerMemberID ";
             sql = sql + "order by count(*) desc ";
             sql = sql + "update #tempcompare set diff = MPlayer_Recs - GDMPlayer_Recs ";
@@ -91,36 +91,12 @@ namespace DupRecRemoval.Classes
                 else
                 {
                     missedrec++;
+
+                    gbase.MPlayer_Rec = 0;
+                    gdmpfilterlist.Add(gbase);
                 }
 
-                //for (int m = 0; m < mpmax; m++)
-                //{
-                //    MPlayerMinimum mbase = mplist[m];
-                //    var mb = mbase.DBname;
-                //    if (gbase.DBname == mbase.DBname && gbase.CurrentPeriod == mbase.CurrentPeriod && gbase.MemberID == mbase.GameDealerMemberID && gbase.SelectedNums == mbase.SelectedNums)
-                //    {
-                //        recfound++;
-                //        //missingrec = 0;
-                //        break;
-                //    }
-                //    //else
-                //    //{
-                //    //    missingrec++;
-                //    //}
-                //}
-                //if (recfound != mpmax - 1)
-                //{
-                //    gdmpfilterlist.Add(gbase);
-                //    isMissingItem = true;
-                //}
             }
-
-            //if (bb == "db_ghl55")
-            //{
-            //    var gg = recfound;
-            //    var mr = missedrec;
-            //}
-
             if (missedrec == 0) {
                 isMissingItem = false;
             }

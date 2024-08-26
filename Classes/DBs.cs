@@ -121,6 +121,16 @@
         public static string MyID = "db_local";
     }
 
+    public class db_local_support
+    {
+        public static string connStr = "Server=localhost;Database=SupportDB;User Id=sa;Password=Kamyen@72;TrustServerCertificate=true;";
+        public static string dbfullname = "SupportDB";
+        public static string ip = "localhost";
+        public static string userId = "sa";
+        public static string password = "Kamyen@72";
+        public static string MyID = "db_local_support";
+    }
+
     public class db_ghlstaging
     {
         public static string connStr = "Server=118.107.201.247;Database=GhlStaging;User Id=sa;Password=p@ssw0rd;TrustServerCertificate=true;";

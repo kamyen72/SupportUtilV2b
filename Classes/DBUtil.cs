@@ -1,6 +1,7 @@
 ﻿using DupRecRemoval.Classes;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using SupportUtilV3.Classes;
 using System.Data;
 using System.Net;
 
@@ -55,8 +56,6 @@ namespace SupportUtil.Classes
             SqlDataAdapter adapter = new SqlDataAdapter(command);
             adapter.Fill(myDataRows);
             connection.Close();
-
-
 
             int maxrows = myDataRows.Rows.Count;
             for (int j = 0; j < maxrows; j++)
@@ -469,7 +468,7 @@ namespace SupportUtil.Classes
                     m.IsWinStop = bool.Parse(r["IsWinStop"].ToString());
                     m.ManualBet = r["ManualBet"].ToString();
                     m.Multiple = r["Multiple"].ToString();
-                    m.RebatePro = int.Parse(r["RebatePro"].ToString());
+                    m.RebatePro = decimal.Parse(r["RebatePro"].ToString());
                     m.RebateProMoney = int.Parse(r["RebateProMoney"].ToString());
                     m.ReferralPayType = int.Parse(r["ReferralPayType"].ToString());
                     m.CashRebatePayType = int.Parse(r["CashRebatePayType"].ToString());
@@ -760,7 +759,7 @@ namespace SupportUtil.Classes
                 sql = sql + "insert into #tempGDMPlayer (dbname, GDMP_ID, MemberID, SelectedNums, UpdateDate, CurrentPeriod) ";
                 sql = sql + "select '@dbName', ID, MemberID, SelectedNums, UpdateDate, CurrentPeriod ";
                 sql = sql + "from GameDealerMPlayer ";
-                sql = sql + "where CurrentPeriod = @CurrentPeriod and MemberID <> 0 and MemberID is not null ";
+                sql = sql + "where CurrentPeriod = @CurrentPeriod and MemberID <> 0 and MemberID is not null and isWin is null";
                 sql = sql + "Update #tempGDMPlayer ";
                 sql = sql + "set UserName = (select top 1 UserName from Mplayer where GamedealerMemberID = a.MemberID) ";
                 sql = sql + "from #tempGDMPlayer a ";
@@ -816,7 +815,7 @@ namespace SupportUtil.Classes
                 sql = sql + ") ";
                 sql = sql + "insert into #tempMplayer (DBname, CurrentPeriod, UpdateDate, UserName, GameDealerMemberID, SelectedNums) ";
                 sql = sql + "select distinct '@dbName', CurrentPeriod, UpdateDate, UserName, GameDealerMemberID, SelectedNums ";
-                sql = sql + "from Mplayer where CurrentPeriod = '@dbCurrentPeriod' ";
+                sql = sql + "from Mplayer where CurrentPeriod = '@dbCurrentPeriod' and iswin is null ";
                 sql = sql + "select * from #tempMplayer ";
 
                 string sql2 = sql.Replace("@dbCurrentPeriod", CurrentPeriod)
@@ -873,5 +872,138 @@ namespace SupportUtil.Classes
             }
         }
 
+        public MenuRoots GetMenuRoots()
+        {
+            string sql = "select text, squence, menurootid from MenuRoot order by squence";
+
+            SqlConnection connection = new SqlConnection(db_local_support.connStr);
+            connection.Open();
+            DataTable myDataRows = new DataTable();
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+            SqlDataAdapter adapter = new SqlDataAdapter(command);
+            adapter.Fill(myDataRows);
+            connection.Close();
+
+            MenuRoots myRoots = new MenuRoots();
+            myRoots.init();
+
+            int mx = myDataRows.Rows.Count;
+            for (int i = 0; i < mx; i++) {
+                DataRow drow = myDataRows.Rows[i];
+
+                RootItem rio = new RootItem();
+                rio.text = drow["text"].ToString();
+                rio.squence = int.Parse( drow["squence"].ToString() );
+                rio.menurootid = int.Parse(drow["menurootid"].ToString());
+
+                myRoots.Roots.Add(rio);
+            }
+
+            return myRoots;
+        }
+
+
+
+        
+
+        //----------------------------------------------------------------------------------------------------------------
+        public string GetMenuRootButtons()
+        {
+            string sql = "select * from mnItem where parentid is null order by squence";
+
+            SqlConnection connection = new SqlConnection(db_local_support.connStr);
+            connection.Open();
+            DataTable myDataRows = new DataTable();
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+            SqlDataAdapter adapter = new SqlDataAdapter(command);
+            adapter.Fill(myDataRows);
+            connection.Close();
+
+            MenuRoots myRoots = new MenuRoots();
+            myRoots.init();
+
+            int mx = myDataRows.Rows.Count;
+            string output = "";
+            int leftposition = 0;
+            int heightpos = 80;
+
+            for (int i = 0; i < mx; i++)
+            {
+                DataRow drow = myDataRows.Rows[i];
+
+                output = output + "<button onclick='showdiv(\"div-" + drow["ID"].ToString() + "\")'  style='width:250px;height:80px;' ";
+                output = output + "data-MenuRootID='" + drow["ID"].ToString() + "'>" + drow["text"].ToString() ;
+                output = output + "</button>";
+                output = output + "<label style='opacity:0;width:5px;'></label>";
+
+
+                //heightpos = heightpos + 80;
+
+                int mychild = 0;
+                output = output + GetMenuItems(drow["ID"].ToString(), leftposition, 250, 1, ref mychild);
+
+                leftposition = leftposition + 255;
+
+            }
+
+            return output;
+        }
+
+        public string GetMenuItems(string myID, int leftpos, int wdth, int mylevel, ref int children)
+        {
+            string output = "";
+            string sql = "";
+            sql = sql + "select * from mnItem where parentid = " + myID + " order by squence ";
+
+            SqlConnection connection = new SqlConnection(db_local_support.connStr);
+            connection.Open();
+            DataTable myDataRows = new DataTable();
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.CommandTimeout = 300; // 5 minutes (60 seconds X 5)
+            SqlDataAdapter adapter = new SqlDataAdapter(command);
+            adapter.Fill(myDataRows);
+            connection.Close();
+
+            RootItems rootItems = new RootItems();
+            rootItems.init();
+            int toppos = 5;
+            int mx = myDataRows.Rows.Count;
+
+            children = mx;
+            string zindex = "1";
+            string bcolor = "#ff6666";
+            string divprefix = "div-";
+            int divtoppos = 85;
+            if (mylevel == 2)
+            {
+                zindex = "999";
+                bcolor = "#ff6677";
+                leftpos = leftpos + 260;
+                divprefix = "l2div-";
+                divtoppos = 0;
+            }
+            output = "<div id='" + divprefix + myID + "' style='z-index:" + zindex + "display:none;background:" + bcolor + ";color:#ffffff;padding-left:5px;padding-right:5px;padding-top:5px;padding-bottom:5px;position:absolute;top:" + divtoppos + "px;left:" + (leftpos + 5) + "px; width:" + wdth.ToString() + "px;height:" + (mx * 80 + 10) + "px;'>";
+            for (int x = 0; x < mx; x++) {
+                DataRow row = myDataRows.Rows[x];
+                output = output + "<button onclick='showdiv(\"l2div-" + row["ID"].ToString() + "\")' style='padding-left:5px;padding-right:5px;width:240px;height:80px;top:" + toppos.ToString() + "px'>";
+                output = output + row["text"].ToString();
+                output = output + "</button>";
+                int mychildren = 0;
+                string mychildstring = GetMenuItems(row["ID"].ToString(), leftpos, 250, 2, ref mychildren);
+                if (mychildren > 0)
+                {
+                    output = output + mychildstring;
+                }
+                toppos = toppos + 80;
+            }
+            output = output + "</div>";
+            
+
+            return output;
+        }
     }
+
+    
 }

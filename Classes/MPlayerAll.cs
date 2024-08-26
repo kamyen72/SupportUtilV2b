@@ -26,7 +26,7 @@
         public bool IsWinStop { get; set; }
         public string ManualBet { get; set; }
         public string Multiple { get; set; }
-        public int RebatePro { get; set; }
+        public decimal RebatePro { get; set; }
         public int RebateProMoney { get; set; }
         public int ReferralPayType { get; set; }
         public int CashRebatePayType { get; set; }
